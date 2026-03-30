@@ -1,85 +1,88 @@
-// auth.js — login, signup, token storage, logout
-
-$(function () {
+﻿$(function () {
   setupAjax();
 
-  // ---- LOGIN PAGE ----
-  if ($('#login-form').length) {
-    const params = new URLSearchParams(location.search);
-    if (params.get('msg')) showToast(params.get('msg'), 'info', 6000);
-    if (params.get('success')) showToast(params.get('success'), 'success', 5000);
-
-    $('#login-form').on('submit', function (e) {
-      e.preventDefault();
-      const email = $('#email').val().trim();
-      const password = $('#password').val();
-      const $btn = $('#login-btn');
-
-      if (!email || !password) { showToast('Please fill in all fields.', 'error'); return; }
-
-      $btn.prop('disabled', true).html('<svg class="animate-spin h-4 w-4 inline mr-1" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Signing in...');
-
-      $.ajax({
-        url: BASE_URL + '/api/auth/login',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ email, password }),
-        success(res) {
-          const u = res.data.user || res.data;
-          localStorage.setItem('ce_token', res.data.token);
-          localStorage.setItem('ce_user', JSON.stringify({ id: u.id, full_name: u.full_name, role: u.role }));
-          window.location.href = u.role === 'admin' ? 'dashboard.html' : 'events.html';
-        },
-        error(xhr) {
-          const msg = xhr.responseJSON?.message || 'Login failed. Check your credentials.';
-          showToast(msg, 'error');
-          $btn.prop('disabled', false).text('Sign In');
-        }
-      });
-    });
-  }
-
-  // ---- SIGNUP PAGE ----
+  // ── Sign-up page ──────────────────────────────────────────────
   if ($('#signup-form').length) {
-    const pwdPolicy = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+    if (isLoggedIn()) {
+      window.location.href = isAdmin() ? 'dashboard.html' : 'events.html';
+      return;
+    }
 
     $('#password').on('input', function () {
       const val = $(this).val();
-      let strength = 'Weak', color = 'bg-red-500', width = '33%';
-      if (pwdPolicy.test(val)) { strength = 'Strong'; color = 'bg-green-500'; width = '100%'; }
-      else if (val.length >= 8 && /[A-Z]/.test(val) && /\d/.test(val)) { strength = 'Medium'; color = 'bg-yellow-500'; width = '66%'; }
-      $('#pwd-bar').css('width', width).removeClass('bg-red-500 bg-yellow-500 bg-green-500').addClass(color);
-      $('#pwd-label').text(strength);
+      let score = 0;
+      if (val.length >= 8)          score++;
+      if (/[A-Z]/.test(val))        score++;
+      if (/[0-9]/.test(val))        score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      const pct    = score * 25;
+      const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+      const colors = ['', 'bg-red-500', 'bg-amber-400', 'bg-yellow-400', 'bg-green-500'];
+      $('#pwd-bar').css('width', pct + '%')
+        .removeClass('bg-red-500 bg-amber-400 bg-yellow-400 bg-green-500')
+        .addClass(colors[score]);
+      $('#pwd-label').text(labels[score]);
     });
 
     $('#signup-form').on('submit', function (e) {
       e.preventDefault();
-      const full_name = $('#full_name').val().trim();
-      const email = $('#email').val().trim();
       const password = $('#password').val();
-      const confirm = $('#confirm_password').val();
-      const $btn = $('#signup-btn');
-
-      if (!full_name || !email || !password || !confirm) { showToast('All fields are required.', 'error'); return; }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Enter a valid email address.', 'error'); return; }
-      if (!pwdPolicy.test(password)) { showToast('Password must be 8+ chars with uppercase, lowercase, number, and special character.', 'error'); return; }
+      const confirm  = $('#confirm_password').val();
       if (password !== confirm) { showToast('Passwords do not match.', 'error'); return; }
-
-      $btn.prop('disabled', true).html('<svg class="animate-spin h-4 w-4 inline mr-1" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Creating account...');
-
+      const $btn = $('#signup-btn').prop('disabled', true).text('Creating account...');
       $.ajax({
-        url: BASE_URL + '/api/auth/signup',
-        method: 'POST',
+        url:         BASE_URL + '/api/auth/register',
+        method:      'POST',
         contentType: 'application/json',
-        data: JSON.stringify({ full_name, email, password }),
-        success() {
-          window.location.href = 'login.html?success=' + encodeURIComponent('Account created! Please sign in.');
-        },
-        error(xhr) {
-          const msg = xhr.responseJSON?.message || 'Signup failed. Try again.';
-          showToast(msg, 'error');
-          $btn.prop('disabled', false).text('Create Account');
-        }
+        data: JSON.stringify({
+          full_name: $('#full_name').val().trim(),
+          email:     $('#email').val().trim().toLowerCase(),
+          password
+        })
+      })
+      .done(() => {
+        showToast('Account created! Redirecting...', 'success');
+        setTimeout(() => window.location.href = 'login.html', 1500);
+      })
+      .fail(xhr => {
+        showToast(xhr.responseJSON?.message || 'Registration failed.', 'error');
+        $btn.prop('disabled', false).text('Create Account');
+      });
+    });
+  }
+
+  // ── Login page ────────────────────────────────────────────────
+  if ($('#login-form').length) {
+    if (isLoggedIn()) {
+      window.location.href = isAdmin() ? 'dashboard.html' : 'events.html';
+      return;
+    }
+
+    const msg = new URLSearchParams(window.location.search).get('msg');
+    if (msg) showToast(msg, 'warning');
+
+    $('#login-form').on('submit', function (e) {
+      e.preventDefault();
+      const $btn = $('#login-btn').prop('disabled', true).text('Signing in...');
+      $.ajax({
+        url:         BASE_URL + '/api/auth/login',
+        method:      'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          email:    $('#email').val().trim().toLowerCase(),
+          password: $('#password').val()
+        })
+      })
+      .done(res => {
+        const token = res.token || res.data?.token;
+        const user  = res.data?.user || res.user || res.data;
+        localStorage.setItem('ce_token', token);
+        localStorage.setItem('ce_user',  JSON.stringify(user));
+        window.location.href = (user && user.role === 'admin') ? 'dashboard.html' : 'events.html';
+      })
+      .fail(xhr => {
+        showToast(xhr.responseJSON?.message || 'Invalid email or password.', 'error');
+        $btn.prop('disabled', false).text('Sign In');
       });
     });
   }

@@ -11,8 +11,44 @@
   <link rel="stylesheet" href="css/custom.css">
   <script src="js/config.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-950 min-h-screen flex flex-col">
   <div id="nav-placeholder"></div>
+
+  <!-- ===== ADMIN HERO BANNER ===== -->
+  <div class="admin-hero">
+    <div class="admin-hero-glow w-96 h-96 bg-indigo-600/30 top-0 right-0 -translate-y-1/2 translate-x-1/3"></div>
+    <div class="admin-hero-glow w-64 h-64 bg-violet-600/20 bottom-0 left-0 translate-y-1/2 -translate-x-1/4"></div>
+    <div class="admin-hero-content max-w-7xl mx-auto px-3 sm:px-4">
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="inline-flex items-center gap-1.5 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest">
+              <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+              Admin Panel
+            </span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight" style="font-family:'Plus Jakarta Sans',sans-serif">
+            CivicEvents<span class="text-indigo-400">+</span> <span class="text-slate-400 font-normal text-xl">Dashboard</span>
+          </h1>
+          <p class="text-slate-400 text-sm mt-1">Manage events, users, announcements, promos and more.</p>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap">
+          <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+            <p class="text-indigo-400 text-xl font-extrabold leading-none" id="hero-stat-events">—</p>
+            <p class="text-slate-500 text-[11px] mt-0.5 font-medium">Events</p>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+            <p class="text-emerald-400 text-xl font-extrabold leading-none" id="hero-stat-users">—</p>
+            <p class="text-slate-500 text-[11px] mt-0.5 font-medium">Users</p>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+            <p class="text-amber-400 text-xl font-extrabold leading-none" id="hero-stat-regs">—</p>
+            <p class="text-slate-500 text-[11px] mt-0.5 font-medium">Registrations</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== GLOBAL MODAL ===== -->
   <div id="modal-overlay" class="hidden fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
@@ -74,6 +110,10 @@
           <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
           Registrations
         </a>
+        <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 hover:bg-indigo-50 hover:text-indigo-700 transition font-medium" data-tab="feedback">
+          <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+          Feedback
+        </a>
 
         <hr class="my-2 border-slate-100">
         <a href="events.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition font-medium">
@@ -105,6 +145,7 @@
         <button class="mob-tab flex-shrink-0 text-xs px-3 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 font-medium" data-tab="promos">Promos</button>
         <button class="mob-tab flex-shrink-0 text-xs px-3 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 font-medium" data-tab="notifications">Notifications</button>
         <button class="mob-tab flex-shrink-0 text-xs px-3 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 font-medium" data-tab="registrations">Registrations</button>
+        <button class="mob-tab flex-shrink-0 text-xs px-3 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 font-medium" data-tab="feedback">Feedback</button>
       </div>
 
       <!-- Overview Tab -->
@@ -165,6 +206,7 @@
       <div id="tab-promos"         class="tab-panel hidden"></div>
       <div id="tab-notifications"  class="tab-panel hidden"></div>
       <div id="tab-registrations"  class="tab-panel hidden"></div>
+      <div id="tab-feedback"        class="tab-panel hidden"></div>
     </div>
   </div>
 

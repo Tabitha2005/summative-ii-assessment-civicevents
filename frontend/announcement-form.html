@@ -69,7 +69,8 @@
   <script>
     $(function () {
       setupAjax();
-      if (isAdmin()) $('#back-btn').attr('href', 'dashboard.html').text('← Back to Dashboard');
+      adminGuard();
+      $('#back-btn').attr('href', './dashboard.html').text('← Back to Dashboard');
       $('#audio').on('change', function () {
         const f = this.files[0];
         if (f) {
@@ -79,8 +80,8 @@
           $('#audio-preview-wrap').removeClass('hidden');
         }
       });
-      $('#nav-placeholder').load('partials/nav.html');
-      $('#footer-placeholder').load('partials/footer.html');
+      $('#nav-placeholder').load('partials/admin-nav.html');
+      $('#footer-placeholder').load('partials/admin-footer.html');
     });
   </script>
 </body>

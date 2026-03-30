@@ -7,7 +7,7 @@ dotenv.config();
 process.on('unhandledRejection', (err) => console.error('Unhandled rejection:', err));
 process.on('uncaughtException',  (err) => { console.error('Uncaught exception:', err); process.exit(1); });
 
-const PORT = parseInt(process.env.PORT || '8080', 10);
+const PORT = parseInt(process.env.PORT || '4000', 10);
 const server = http.createServer(app);
 
 server.on('error', (err) => {

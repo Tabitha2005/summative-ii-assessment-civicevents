@@ -12,7 +12,7 @@
   <div id="nav-placeholder"></div>
 
   <main class="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
-    <a id="back-btn" href="events.html" class="inline-flex items-center gap-1 text-indigo-600 text-sm hover:underline mb-6">
+    <a id="back-btn" href="./events.html" class="inline-flex items-center gap-1 text-indigo-600 text-sm hover:underline mb-6">
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       Back
     </a>
@@ -74,7 +74,7 @@
 
         <div class="flex gap-3">
           <button id="submit-btn" type="submit" class="btn-primary">Save Event</button>
-          <a href="events.html" class="px-5 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition">Cancel</a>
+          <a href="./events.html" class="px-5 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition">Cancel</a>
         </div>
       </form>
     </div>
@@ -82,13 +82,14 @@
 
   <div id="footer-placeholder"></div>
 
-  <script src="js/events.js"></script>
+  <script src="js/events.js?v=3"></script>
   <script>
     $(function () {
       setupAjax();
-      if (isAdmin()) $('#back-btn').attr('href', 'dashboard.html').text('← Back to Dashboard');
-      $('#nav-placeholder').load('partials/nav.html');
-      $('#footer-placeholder').load('partials/footer.html');
+      adminGuard();
+      $('#back-btn').attr('href', './dashboard.html').text('← Back to Dashboard');
+      $('#nav-placeholder').load('partials/admin-nav.html');
+      $('#footer-placeholder').load('partials/admin-footer.html');
     });
   </script>
 </body>

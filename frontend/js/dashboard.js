@@ -78,6 +78,7 @@ $(function () {
     else if (tab === 'promos')         loadAdminPromos();
     else if (tab === 'notifications')  loadAdminNotifications();
     else if (tab === 'registrations')  loadAdminRegistrations();
+    else if (tab === 'feedback')        loadAdminFeedback();
   };
 
   // Load overview on start
@@ -108,6 +109,10 @@ $(function () {
         $('#stat-users').text(totalUsers);
         $('#stat-registrations').text(totalRegistrations);
         $('#stat-notifications').text(totalNotifications);
+        // Hero banner quick stats
+        $('#hero-stat-events').text(totalEvents);
+        $('#hero-stat-users').text(totalUsers);
+        $('#hero-stat-regs').text(totalRegistrations);
 
         // Update sub-labels with extra context
         $('#stat-events-sub').text(n(d.events?.upcoming_events) + ' upcoming');
@@ -256,16 +261,26 @@ $(function () {
             <td class="px-4 py-3">${pubBadge(ev.published)}</td>
             <td class="px-4 py-3">
               <div class="flex gap-2 flex-wrap">
-                <a href="event-form.html?id=${ev.id}" class="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg hover:bg-amber-100 transition font-medium">Edit</a>
+                <button type="button" class="dash-edit-event text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg hover:bg-amber-100 transition font-medium" data-id="${ev.id}">Edit</button>
                 <button class="del-event text-xs bg-red-50 text-red-600 border border-red-200 px-2.5 py-1 rounded-lg hover:bg-red-100 transition font-medium" data-id="${ev.id}">Delete</button>
               </div>
             </td>
           </tr>`);
 
         $('#tab-events').html(
-          sectionHeader('Events', `<a href="event-form.html" class="btn-primary text-sm">+ New Event</a>`) +
+          sectionHeader('Events', `<button type="button" id="dash-new-event" class="btn-primary text-sm">+ New Event</button>`) +
           tableWrap(['Event', 'Date', 'Status', 'Actions'], rows, 'No events created yet.')
         );
+
+        $(document).off('click', '.dash-edit-event').on('click', '.dash-edit-event', function () {
+          sessionStorage.setItem('ce_edit_event_id', $(this).data('id'));
+          window.location.href = './event-form.html';
+        });
+
+        $(document).off('click', '#dash-new-event').on('click', '#dash-new-event', function () {
+          sessionStorage.removeItem('ce_edit_event_id');
+          window.location.href = './event-form.html';
+        });
 
         $(document).off('click', '.del-event').on('click', '.del-event', function () {
           const id = $(this).data('id');
@@ -291,18 +306,30 @@ $(function () {
             <td class="px-4 py-3 text-xs text-slate-400 whitespace-nowrap">${new Date(a.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
             <td class="px-4 py-3">
               <div class="flex gap-2 flex-wrap">
-                <a href="announcement-detail.html?id=${a.id}" class="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-1 rounded-lg hover:bg-indigo-100 transition font-medium">▶ Play</a>
-                <a href="announcement-form.html?id=${a.id}" class="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg hover:bg-amber-100 transition font-medium">Edit</a>
+                <button type="button" class="dash-play-ann text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-1 rounded-lg hover:bg-indigo-100 transition font-medium" data-id="${a.id}">▶ Play</button>
+                <button type="button" class="dash-edit-ann text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg hover:bg-amber-100 transition font-medium" data-id="${a.id}">Edit</button>
                 <button class="del-ann text-xs bg-red-50 text-red-600 border border-red-200 px-2.5 py-1 rounded-lg hover:bg-red-100 transition font-medium" data-id="${a.id}">Delete</button>
               </div>
             </td>
           </tr>`);
 
         $('#tab-announcements').html(
-          sectionHeader('Announcements', `<a href="announcement-form.html" class="btn-primary text-sm">+ New Announcement</a>`) +
+          sectionHeader('Announcements', `<button type="button" id="dash-new-ann" class="btn-primary text-sm">+ New Announcement</button>`) +
           tableWrap(['Title', 'Status', 'Date', 'Actions'], rows, 'No announcements created yet.')
         );
 
+        $(document).off('click', '.dash-play-ann').on('click', '.dash-play-ann', function () {
+          sessionStorage.setItem('ce_ann_id', $(this).data('id'));
+          window.location.href = './announcement-detail.html';
+        });
+        $(document).off('click', '.dash-edit-ann').on('click', '.dash-edit-ann', function () {
+          sessionStorage.setItem('ce_edit_ann_id', $(this).data('id'));
+          window.location.href = './announcement-form.html';
+        });
+        $(document).off('click', '#dash-new-ann').on('click', '#dash-new-ann', function () {
+          sessionStorage.removeItem('ce_edit_ann_id');
+          window.location.href = './announcement-form.html';
+        });
         $(document).off('click', '.del-ann').on('click', '.del-ann', function () {
           const id = $(this).data('id');
           if (!confirm('Delete this announcement?')) return;
@@ -326,7 +353,7 @@ $(function () {
             <td class="px-4 py-3">${pubBadge(p.published)}</td>
             <td class="px-4 py-3">
               <div class="flex gap-2 flex-wrap">
-                <a href="promo-form.html?id=${p.id}" class="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg hover:bg-amber-100 transition font-medium">Edit</a>
+                <button type="button" class="dash-edit-promo text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg hover:bg-amber-100 transition font-medium" data-id="${p.id}">Edit</button>
                 <button class="toggle-promo-pub text-xs border px-2.5 py-1 rounded-lg transition font-medium
                   ${!!p.published ? 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'}"
                   data-id="${p.id}" data-pub="${!!p.published ? '1' : '0'}">
@@ -338,10 +365,18 @@ $(function () {
           </tr>`);
 
         $('#tab-promos').html(
-          sectionHeader('Promos', `<a href="promo-form.html" class="btn-primary text-sm">+ New Promo</a>`) +
+          sectionHeader('Promos', `<button type="button" id="dash-new-promo" class="btn-primary text-sm">+ New Promo</button>`) +
           tableWrap(['Title', 'Status', 'Actions'], rows, 'No promos created yet.')
         );
 
+        $(document).off('click', '.dash-edit-promo').on('click', '.dash-edit-promo', function () {
+          sessionStorage.setItem('ce_edit_promo_id', $(this).data('id'));
+          window.location.href = './promo-form.html';
+        });
+        $(document).off('click', '#dash-new-promo').on('click', '#dash-new-promo', function () {
+          sessionStorage.removeItem('ce_edit_promo_id');
+          window.location.href = './promo-form.html';
+        });
         $(document).off('click', '.del-promo').on('click', '.del-promo', function () {
           const id = $(this).data('id');
           if (!confirm('Delete this promo?')) return;
@@ -441,7 +476,7 @@ $(function () {
             </td>
             <td class="px-4 py-3 text-xs text-slate-400 whitespace-nowrap">${regDate}</td>
             <td class="px-4 py-3">
-              <a href="event-detail.html?id=${r.event_id}" class="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-1 rounded-lg hover:bg-indigo-100 transition font-medium">View Event</a>
+              <button type="button" class="dash-view-event text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-1 rounded-lg hover:bg-indigo-100 transition font-medium" data-id="${r.event_id}">View Event</button>
             </td>
           </tr>`;
         });
@@ -454,8 +489,54 @@ $(function () {
           </div>` +
           tableWrap(['User', 'Event', 'Event Date', 'Status', 'Registered On', 'Action'], rows, 'No registrations yet.')
         );
+
+        $(document).off('click', '.dash-view-event').on('click', '.dash-view-event', function () {
+          sessionStorage.setItem('ce_event_id', $(this).data('id'));
+          window.location.href = './event-detail.html';
+        });
       })
       .fail(() => showToast('Could not load registrations.', 'error'));
+  }
+
+  // ── FEEDBACK ──────────────────────────────────────────────────
+  function loadAdminFeedback() {
+    $('#tab-feedback').html(loadingHtml());
+    // First get all events, then fetch feedback for each
+    $.get(BASE_URL + '/api/events')
+      .done(res => {
+        const events = extractList(res, ['events', 'data', 'results']);
+        if (!events.length) {
+          $('#tab-feedback').html(sectionHeader('Feedback') + tableWrap([], [], 'No events yet.'));
+          return;
+        }
+        // Fetch feedback for all events in parallel
+        const requests = events.map(ev =>
+          $.ajax({ url: BASE_URL + '/api/event-feedback/event/' + ev.id, method: 'GET' })
+            .then(r => ({ ev, list: extractList(r, ['feedback', 'data', 'results']) }))
+            .catch(() => ({ ev, list: [] }))
+        );
+        Promise.all(requests).then(results => {
+          const rows = [];
+          results.forEach(({ ev, list }) => {
+            list.forEach(f => {
+              const stars = '★'.repeat(f.rating) + '☆'.repeat(5 - f.rating);
+              const date  = f.created_at ? new Date(f.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+              rows.push(`<tr class="hover:bg-indigo-50/30 transition">
+                <td class="px-4 py-3 text-sm font-semibold text-slate-800 max-w-[160px] truncate">${ev.title}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">${f.full_name || f.user?.full_name || 'User'}</td>
+                <td class="px-4 py-3 text-yellow-400 text-sm">${stars}</td>
+                <td class="px-4 py-3 text-xs text-slate-500 max-w-[200px] truncate">${f.comment || '<span class="text-slate-300">—</span>'}</td>
+                <td class="px-4 py-3 text-xs text-slate-400 whitespace-nowrap">${date}</td>
+              </tr>`);
+            });
+          });
+          $('#tab-feedback').html(
+            sectionHeader(`Feedback <span class="text-base font-normal text-slate-400 ml-2">(${rows.length} total)</span>`) +
+            tableWrap(['Event', 'User', 'Rating', 'Comment', 'Date'], rows, 'No feedback submitted yet.')
+          );
+        });
+      })
+      .fail(() => showToast('Could not load feedback.', 'error'));
   }
 
   // ── Auto-refresh overview every 30s ──────────────────────────

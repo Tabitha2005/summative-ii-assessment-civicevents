@@ -2,9 +2,9 @@
    config.js — CivicEvents+ global helpers
    ============================================================ */
 
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = 'http://localhost:4000';
 
-// ── Auth ──────────────────────────────────────────────────────
+// ── Auth helpers ──────────────────────────────────────────────
 function getToken()  { return localStorage.getItem('ce_token'); }
 function getUser()   { try { return JSON.parse(localStorage.getItem('ce_user')); } catch { return null; } }
 function isAdmin()   { const u = getUser(); return u && u.role === 'admin'; }
@@ -16,23 +16,17 @@ function logout(msg) {
   window.location.href = 'login.html' + (msg ? '?msg=' + encodeURIComponent(msg) : '');
 }
 
+// ── Route guards ──────────────────────────────────────────────
+// Use on pages any logged-in user can see (events, promos, etc.)
 function authGuard() {
   if (!isLoggedIn()) { logout(); return; }
-  // ROLE-BASED GUARD: admins are allowed on all pages; only block unauthenticated users
 }
 
+// Use on admin-only pages (dashboard, user management, etc.)
 function adminGuard() {
   if (!isLoggedIn()) { logout(); return; }
   if (!isAdmin()) {
-    document.body.innerHTML = `
-      <div class="min-h-screen flex items-center justify-center bg-slate-50">
-        <div class="text-center p-10 bg-white rounded-2xl shadow-lg max-w-sm">
-          <p class="text-6xl mb-4">🔒</p>
-          <h1 class="text-2xl font-bold text-red-500 mb-2">Access Denied</h1>
-          <p class="text-slate-500 mb-6">You don't have permission to view this page.</p>
-          <a href="events.html" class="btn-primary">← Back to Events</a>
-        </div>
-      </div>`;
+    window.location.href = 'events.html';
     throw new Error('Forbidden');
   }
 }
@@ -46,17 +40,21 @@ function setupAjax() {
     }
   });
   $(document).ajaxError(function (e, xhr, settings) {
-    // Auth routes handle their own errors — skip global handler
-    if (settings.url && (settings.url.includes('/api/auth/login') || settings.url.includes('/api/auth/signup'))) return;
+    if (!settings.url) return;
+    if (
+      settings.url.includes('/api/auth/login') ||
+      settings.url.includes('/api/auth/register') ||
+      settings.url.includes('partials/')
+    ) return;
     if (xhr.status === 401) logout('Session expired. Please log in again.');
-    else if (xhr.status === 403) showToast('You don\'t have permission to do that.', 'error');
-    else if (xhr.status === 404) showToast('Resource not found.', 'error');
+    else if (xhr.status === 403) showToast("You don't have permission to do that.", 'error');
+    else if (xhr.status === 404 && settings.url.includes('/api/')) showToast('Resource not found.', 'error');
     else if (xhr.status >= 500) showToast('Server error. Please try again.', 'error');
     else if (xhr.status === 0)  showNetworkBanner();
   });
 }
 
-// ── Universal response extractor ─────────────────────────────
+// ── Universal response extractor ──────────────────────────────
 function extractList(response, keys) {
   if (!response) return [];
   for (const key of keys) {
@@ -66,7 +64,7 @@ function extractList(response, keys) {
   return [];
 }
 
-// ── Published filter (handles true / 1 / "true") ─────────────
+// ── Published filter ──────────────────────────────────────────
 function onlyPublished(items) {
   return items.filter(i => !!i.published);
 }
@@ -91,7 +89,7 @@ function announcementAudioUrl(url) {
   return BASE_URL + '/uploads/announcements/' + filename;
 }
 
-// ── Toast (bottom-right stack, slide-up) ─────────────────────
+// ── Toast notifications ───────────────────────────────────────
 function showToast(msg, type = 'info', duration = 3500) {
   const palette = {
     success: 'bg-emerald-600',
@@ -100,15 +98,13 @@ function showToast(msg, type = 'info', duration = 3500) {
     info:    'bg-indigo-600'
   };
   const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-  const bg = palette[type] || palette.info;
-  const icon = icons[type] || icons.info;
-
+  const bg   = palette[type] || palette.info;
+  const icon = icons[type]   || icons.info;
   if (!$('#toast-container').length) {
     $('body').append('<div id="toast-container" class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2 items-end"></div>');
   }
   const $t = $(`
-    <div class="flex items-center gap-3 ${bg} text-white text-sm font-medium px-4 py-3 rounded-xl shadow-xl max-w-xs
-                translate-y-4 opacity-0 transition-all duration-300">
+    <div class="flex items-center gap-3 ${bg} text-white text-sm font-medium px-4 py-3 rounded-xl shadow-xl max-w-xs translate-y-4 opacity-0 transition-all duration-300">
       <span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs flex-shrink-0">${icon}</span>
       <span>${msg}</span>
     </div>`);
@@ -187,8 +183,8 @@ function renderNotifDrawer(notifications) {
     return;
   }
 
-  const typeIcons   = { event: '🗓', announcement: '📢', promo: '🎬', broadcast: '📡' };
-  const typeBadges  = {
+  const typeIcons  = { event: '🗓', announcement: '📢', promo: '🎬', broadcast: '📡' };
+  const typeBadges = {
     event:        'bg-indigo-100 text-indigo-700',
     announcement: 'bg-amber-100 text-amber-700',
     promo:        'bg-pink-100 text-pink-700',
@@ -199,18 +195,19 @@ function renderNotifDrawer(notifications) {
     const icon   = typeIcons[n.type]  || '🔔';
     const badge  = typeBadges[n.type] || 'bg-slate-100 text-slate-600';
     const isRead = n.read || n.is_read;
-    // ROLE-BASED GUARD: only admins see delete button in drawer
     const delBtn = isAdmin()
       ? `<button class="notif-delete flex-shrink-0 p-1 text-slate-300 hover:text-red-500 transition" data-id="${n.id}" aria-label="Delete notification">
            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
          </button>` : '';
     let link = '#';
-    if (n.metadata?.event_id) link = `event-detail.html?id=${n.metadata.event_id}`;
+    if (n.metadata?.event_id) {
+      link = 'event-detail';
+    }
 
     $list.append(`
-      <div class="flex items-start gap-3 px-4 py-3.5 border-b border-slate-100 hover:bg-slate-50 transition ${isRead ? '' : 'bg-indigo-50/60'}" data-id="${n.id}" data-link="${link}">
+      <div class="flex items-start gap-3 px-4 py-3.5 border-b border-slate-100 hover:bg-slate-50 transition ${isRead ? '' : 'bg-indigo-50/60'}" data-id="${n.id}" data-event-id="${n.metadata?.event_id || ''}">
         <span class="text-xl flex-shrink-0 mt-0.5">${icon}</span>
-        <div class="notif-item-body flex-1 min-w-0 ${link !== '#' ? 'cursor-pointer' : ''}">
+        <div class="notif-item-body flex-1 min-w-0 ${n.metadata?.event_id ? 'cursor-pointer' : ''}">
           <p class="text-sm font-semibold text-slate-800 truncate">${n.title}</p>
           <p class="text-xs text-slate-500 mt-0.5 line-clamp-2">${n.message}</p>
           <div class="flex items-center gap-2 mt-1.5 flex-wrap">
@@ -224,8 +221,11 @@ function renderNotifDrawer(notifications) {
   });
 
   $list.off('click', '.notif-item-body').on('click', '.notif-item-body', function () {
-    const link = $(this).closest('[data-link]').data('link');
-    if (link && link !== '#') window.location.href = link;
+    const eventId = $(this).closest('[data-event-id]').data('event-id');
+    if (eventId) {
+      sessionStorage.setItem('ce_event_id', eventId);
+      window.location.href = './event-detail.html';
+    }
   });
 
   $list.off('click', '.notif-delete').on('click', '.notif-delete', function (e) {

@@ -80,6 +80,8 @@
   <script>
     $(function () {
       setupAjax();
+      authGuard();
+      if (isAdmin()) { window.location.href = './dashboard.html'; return; }
       $('#nav-placeholder').load('partials/nav.html');
       $('#footer-placeholder').load('partials/footer.html');
     });

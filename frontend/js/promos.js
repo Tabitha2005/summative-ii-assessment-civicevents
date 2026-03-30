@@ -178,15 +178,18 @@ $(function () {
     });
 
     $(document).on('click', '.edit-promo', function () {
-      window.location.href = 'promo-form.html?id=' + $(this).data('id');
+      sessionStorage.setItem('ce_edit_promo_id', $(this).data('id'));
+      window.location.href = './promo-form.html';
     });
   }
 
   // ── PROMO DETAIL PAGE ────────────────────────────────────────
   if ($('#promo-detail').length) {
     authGuard();
-    const id = new URLSearchParams(location.search).get('id');
-    if (!id) { window.location.href = 'promos.html'; return; }
+    const id = new URLSearchParams(location.search).get('id')
+             || sessionStorage.getItem('ce_promo_id');
+    sessionStorage.removeItem('ce_promo_id');
+    if (!id) { window.location.href = './promos.html'; return; }
 
     $.get(BASE_URL + '/api/promos/' + id)
       .done(res => {
@@ -257,7 +260,9 @@ $(function () {
   // ── PROMO FORM (admin) ───────────────────────────────────────
   if ($('#promo-form').length) {
     adminGuard();
-    const id = new URLSearchParams(location.search).get('id');
+    const id = new URLSearchParams(location.search).get('id')
+             || sessionStorage.getItem('ce_edit_promo_id');
+    if (id) sessionStorage.setItem('ce_edit_promo_id', id);
 
     if (id) {
       $('#form-title').text('Edit Promo');
@@ -309,7 +314,7 @@ $(function () {
             id ? 'Promo updated!' : (isPublished ? '✓ Promo published! Users can now see it.' : 'Promo saved as draft.'),
             'success'
           );
-          setTimeout(() => window.location.href = 'dashboard.html', 1200);
+          setTimeout(() => window.location.href = './dashboard.html', 1200);
         },
         error(xhr) {
           showToast(xhr.responseJSON?.message || 'Upload failed.', 'error');

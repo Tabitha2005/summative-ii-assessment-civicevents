@@ -101,8 +101,13 @@
         $('#hero-name').text(u.full_name || 'Your Profile');
         $('#hero-role-badge').text(u.role || '');
       }
-      $('#nav-placeholder').load('partials/nav.html');
-      $('#footer-placeholder').load('partials/footer.html');
+      if (isAdmin()) {
+        $('#nav-placeholder').load('partials/admin-nav.html');
+        $('#footer-placeholder').load('partials/admin-footer.html');
+      } else {
+        $('#nav-placeholder').load('partials/nav.html');
+        $('#footer-placeholder').load('partials/footer.html');
+      }
     });
   </script>
 </body>

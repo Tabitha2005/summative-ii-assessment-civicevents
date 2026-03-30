@@ -14,12 +14,11 @@
   <div id="nav-placeholder"></div>
 
   <main class="flex-1 max-w-4xl mx-auto w-full px-4 py-8" id="event-detail">
-    <a href="events.html" class="inline-flex items-center gap-1.5 text-indigo-600 text-sm font-medium hover:text-indigo-800 transition mb-6 group">
+    <a href="./events.html" class="inline-flex items-center gap-1.5 text-indigo-600 text-sm font-medium hover:text-indigo-800 transition mb-6 group">
       <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       Back to Events
     </a>
 
-    <!-- Main card -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
       <div class="relative">
         <div id="event-img-container" class="w-full hero-img-sm bg-gradient-to-br from-indigo-900 via-indigo-700 to-purple-800 relative overflow-hidden">
@@ -35,7 +34,6 @@
       </div>
 
       <div class="p-6">
-        <!-- Meta row -->
         <div class="event-meta-grid mb-6">
           <div class="flex items-center gap-3 bg-indigo-50 rounded-xl p-3">
             <div class="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center text-lg flex-shrink-0">📍</div>
@@ -63,32 +61,27 @@
 
         <p id="event-desc" class="text-gray-700 leading-relaxed mb-6"></p>
 
-        <!-- Actions -->
-        <!-- ROLE-BASED GUARD: register button hidden from admins -->
         <div class="flex gap-3 flex-wrap">
-          <button id="reg-btn" data-registered="false" class="btn-primary flex-1 sm:flex-none justify-center bg-indigo-600 hover:bg-indigo-700" aria-label="Register for event">Register for Event</button>
-          <a id="admin-edit-btn" href="#" class="hidden inline-flex items-center gap-2 px-4 py-2.5 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-xl text-sm font-medium hover:bg-yellow-100 transition">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          <button id="reg-btn" type="button" data-registered="false"
+            class="btn-primary flex-1 sm:flex-none justify-center"
+            aria-label="Register for event">Register for Event</button>
+          <a id="admin-edit-btn" href="#"
+            class="hidden inline-flex items-center gap-2 px-4 py-2.5 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-xl text-sm font-medium hover:bg-yellow-100 transition">
             Edit Event
           </a>
-          <button id="admin-delete-btn" class="hidden inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium hover:bg-red-100 transition">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          <button id="admin-delete-btn"
+            class="hidden inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium hover:bg-red-100 transition">
             Delete
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Attendees (admin only) -->
     <section id="attendees-section" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-      <h2 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
-        <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        Registered Attendees
-      </h2>
+      <h2 class="font-bold text-gray-800 mb-4">Registered Attendees</h2>
       <ul id="attendees-list" class="divide-y divide-gray-100"></ul>
     </section>
 
-    <!-- Feedback -->
     <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
       <h2 class="font-bold text-gray-800 mb-1 flex items-center gap-2">
         <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -99,22 +92,22 @@
 
       <div id="feedback-form-section">
         <h3 class="font-semibold text-gray-700 mb-4 text-sm">Leave Your Feedback</h3>
-        <form id="feedback-form">
+        <form id="feedback-form" onsubmit="return false;">
           <div class="mb-4">
             <label class="block text-sm text-gray-600 mb-2">Rating <span class="text-red-500">*</span></label>
-            <div id="star-rating" class="star-rating flex gap-2 text-3xl text-gray-300" role="group" aria-label="Star rating">
-              <span data-val="1" tabindex="0" role="radio" aria-label="1 star">★</span>
-              <span data-val="2" tabindex="0" role="radio" aria-label="2 stars">★</span>
-              <span data-val="3" tabindex="0" role="radio" aria-label="3 stars">★</span>
-              <span data-val="4" tabindex="0" role="radio" aria-label="4 stars">★</span>
-              <span data-val="5" tabindex="0" role="radio" aria-label="5 stars">★</span>
+            <div id="star-rating" class="flex gap-2 text-3xl text-gray-300 cursor-pointer">
+              <span data-val="1">★</span>
+              <span data-val="2">★</span>
+              <span data-val="3">★</span>
+              <span data-val="4">★</span>
+              <span data-val="5">★</span>
             </div>
           </div>
           <div class="mb-4">
             <label for="feedback-comment" class="block text-sm text-gray-600 mb-1">Comment <span class="text-gray-400">(optional)</span></label>
             <textarea id="feedback-comment" rows="3" class="form-input" placeholder="Share your experience..."></textarea>
           </div>
-          <button type="submit" class="btn-primary">Submit Feedback</button>
+          <button id="feedback-submit-btn" type="button" class="btn-primary">Submit Feedback</button>
         </form>
       </div>
     </section>
@@ -122,18 +115,198 @@
 
   <div id="footer-placeholder"></div>
 
-  <script src="js/events.js"></script>
   <script>
-    $(function () {
-      setupAjax();
-      // ROLE-BASED GUARD: admins don't register or submit feedback
-      if (isAdmin()) {
-        $('#reg-btn').addClass('hidden');
-        $('#feedback-form-section').addClass('hidden');
+  $(function () {
+    setupAjax();
+    authGuard();
+    if (isAdmin()) { window.location.href = './dashboard.html'; return; }
+    $('#nav-placeholder').load('partials/nav.html');
+    $('#footer-placeholder').load('partials/footer.html');
+
+    const eventId = new URLSearchParams(window.location.search).get('id')
+                  || sessionStorage.getItem('ce_event_id');
+    sessionStorage.removeItem('ce_event_id');
+    if (eventId) sessionStorage.setItem('ce_event_id', eventId);
+
+    if (!eventId) {
+      showToast('No event selected.', 'error');
+      setTimeout(() => window.location.href = './events.html', 1500);
+      return;
+    }
+
+    // Hide register/feedback for admins
+    if (isAdmin()) {
+      $('#reg-btn').addClass('hidden');
+      $('#feedback-form-section').addClass('hidden');
+    }
+
+    // Load event data
+    $.get(BASE_URL + '/api/events/' + eventId)
+      .done(res => {
+        const ev = res.data || res;
+        $('#event-title').text(ev.title || '');
+        $('#event-location').text(ev.location || 'TBC');
+        $('#event-desc').text(ev.description || '');
+        $('#event-start').text(ev.starts_at ? new Date(ev.starts_at).toLocaleString('en-GB') : 'TBC');
+        $('#event-end').text(ev.ends_at     ? new Date(ev.ends_at).toLocaleString('en-GB')   : 'TBC');
+
+        const imgUrl = ev.image_url
+          ? (ev.image_url.startsWith('http') ? ev.image_url : BASE_URL + ev.image_url)
+          : (ev.metadata && ev.metadata.image_url ? BASE_URL + '/uploads/events/' + ev.metadata.image_url.replace(/^.*uploads\/events\//, '') : null);
+        if (imgUrl) $('#event-img').attr('src', imgUrl).attr('alt', ev.title);
+
+        if (ev.location) {
+          $('#map-link').attr('href', 'https://maps.google.com/?q=' + encodeURIComponent(ev.location)).removeClass('hidden');
+        }
+
+        if (isAdmin()) {
+          $('#admin-edit-btn').data('evid', ev.id).removeClass('hidden');
+          $('#admin-delete-btn').removeClass('hidden');
+          $('#attendees-section').removeClass('hidden');
+          loadAttendees(ev.id);
+        }
+      })
+      .fail(() => showToast('Could not load event.', 'error'));
+
+    // Check registration status
+    if (!isAdmin()) {
+      $.get(BASE_URL + '/api/event-registrations/my-registrations')
+        .done(res => {
+          const regs = extractList(res, ['registrations', 'data', 'results']);
+          const existing = regs.find(r => r.event_id === eventId && r.status !== 'cancelled');
+          if (existing) {
+            $('#reg-btn').text('Cancel Registration')
+              .attr('data-registered', 'true')
+              .removeClass('bg-indigo-600 hover:bg-indigo-700')
+              .addClass('bg-red-500 hover:bg-red-600');
+          }
+        });
+    }
+
+    // Register / Cancel
+    $('#reg-btn').on('click', function () {
+      if (!isLoggedIn()) { window.location.href = 'login.html'; return; }
+      const $btn         = $(this).prop('disabled', true);
+      const isRegistered = $btn.attr('data-registered') === 'true';
+
+      if (isRegistered) {
+        $.ajax({ url: BASE_URL + '/api/event-registrations/cancel', method: 'POST',
+          contentType: 'application/json', data: JSON.stringify({ event_id: eventId }) })
+        .done(() => {
+          showToast('Registration cancelled.', 'info');
+          $btn.text('Register for Event').attr('data-registered', 'false')
+            .removeClass('bg-red-500 hover:bg-red-600').addClass('bg-indigo-600 hover:bg-indigo-700')
+            .prop('disabled', false);
+        })
+        .fail(() => { showToast('Could not cancel.', 'error'); $btn.prop('disabled', false); });
+      } else {
+        $.ajax({ url: BASE_URL + '/api/event-registrations/register', method: 'POST',
+          contentType: 'application/json', data: JSON.stringify({ event_id: eventId }) })
+        .done(() => {
+          showToast('Registered successfully!', 'success');
+          $btn.text('Cancel Registration').attr('data-registered', 'true')
+            .removeClass('bg-indigo-600 hover:bg-indigo-700').addClass('bg-red-500 hover:bg-red-600')
+            .prop('disabled', false);
+          if (isAdmin()) loadAttendees(eventId);
+        })
+        .fail(xhr => { showToast(xhr.responseJSON?.message || 'Registration failed.', 'error'); $btn.prop('disabled', false); });
       }
-      $('#nav-placeholder').load('partials/nav.html');
-      $('#footer-placeholder').load('partials/footer.html');
     });
+
+    // Admin edit
+    $('#admin-edit-btn').on('click', function (e) {
+      e.preventDefault();
+      sessionStorage.setItem('ce_edit_event_id', $(this).data('evid'));
+      window.location.href = './event-form.html';
+    });
+
+    // Admin delete
+    $('#admin-delete-btn').on('click', function () {
+      if (!confirm('Delete this event?')) return;
+      $.ajax({ url: BASE_URL + '/api/events/' + eventId, method: 'DELETE' })
+        .done(() => { showToast('Event deleted.', 'success'); setTimeout(() => window.location.href = './events.html', 900); })
+        .fail(() => showToast('Delete failed.', 'error'));
+    });
+
+    // Star rating
+    let selectedRating = 0;
+    $('#star-rating span').on('click', function () {
+      selectedRating = parseInt($(this).data('val'));
+      $('#star-rating span').each(function () {
+        $(this).css('color', parseInt($(this).data('val')) <= selectedRating ? '#f59e0b' : '#d1d5db');
+      });
+    });
+
+    // Submit Feedback — using button type=button, no form submit
+    $('#feedback-submit-btn').on('click', function () {
+      if (!selectedRating) { showToast('Please select a star rating.', 'warning'); return; }
+      const $btn = $(this).prop('disabled', true).text('Submitting...');
+      $.ajax({
+        url: BASE_URL + '/api/event-feedback', method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ event_id: eventId, rating: selectedRating, comment: $('#feedback-comment').val().trim() })
+      })
+      .done(() => {
+        showToast('Feedback submitted! Thank you.', 'success');
+        $('#feedback-comment').val('');
+        selectedRating = 0;
+        $('#star-rating span').css('color', '#d1d5db');
+        loadFeedback(eventId);
+        $btn.prop('disabled', false).text('Submit Feedback');
+      })
+      .fail(xhr => {
+        showToast(xhr.responseJSON?.message || 'Could not submit feedback.', 'error');
+        $btn.prop('disabled', false).text('Submit Feedback');
+      });
+    });
+
+    // Load feedback
+    loadFeedback(eventId);
+
+    function loadAttendees(evId) {
+      $.get(BASE_URL + '/api/event-registrations/event/' + evId)
+        .done(res => {
+          const regs = extractList(res, ['registrations', 'data', 'results']);
+          const $list = $('#attendees-list').empty();
+          if (!regs.length) { $list.html('<li class="text-sm text-gray-400 py-2">No registrations yet.</li>'); return; }
+          regs.forEach(r => {
+            const name = r.full_name || r.user?.full_name || 'User';
+            $list.append(`
+              <li class="flex items-center gap-3 py-2">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-xs font-bold">${name.charAt(0).toUpperCase()}</div>
+                <div>
+                  <p class="text-sm font-medium text-gray-800">${name}</p>
+                  <p class="text-xs text-gray-400">${r.email || r.user?.email || ''}</p>
+                </div>
+                <span class="ml-auto text-xs px-2 py-0.5 rounded-full ${r.status === 'cancelled' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}">${r.status || 'registered'}</span>
+              </li>`);
+          });
+        });
+    }
+
+    function loadFeedback(evId) {
+      // Use global: false to suppress the ajaxError permission toast for non-admin users
+      $.ajax({ url: BASE_URL + '/api/event-feedback/event/' + evId, method: 'GET', global: false })
+        .done(res => {
+          const list = extractList(res, ['feedback', 'data', 'results']);
+          const $fl  = $('#feedback-list').empty();
+          if (!list.length) { $fl.html('<p class="text-sm text-gray-400">No feedback yet. Be the first!</p>'); return; }
+          const avg = list.reduce((s, f) => s + f.rating, 0) / list.length;
+          $('#feedback-avg').text('Average: ' + avg.toFixed(1) + ' / 5 (' + list.length + ' review' + (list.length !== 1 ? 's' : '') + ')');
+          list.forEach(f => {
+            const stars = '★'.repeat(f.rating) + '☆'.repeat(5 - f.rating);
+            $fl.append(`
+              <div class="border border-gray-100 rounded-xl p-4 bg-gray-50">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-yellow-400 text-sm">${stars}</span>
+                  <span class="text-xs text-gray-400">${f.full_name || f.user?.full_name || 'User'}</span>
+                </div>
+                ${f.comment ? `<p class="text-sm text-gray-600">${f.comment}</p>` : ''}
+              </div>`);
+          });
+        }).fail(() => {});
+    }
+  });
   </script>
 </body>
 </html>

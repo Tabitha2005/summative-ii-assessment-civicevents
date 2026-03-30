@@ -3,7 +3,7 @@
 $(function () {
   setupAjax();
 
-  // ── ANNOUNCEMENTS LIST ───────────────────────────────────────
+  // ── ANNOUNCEMENTS LIST ────────────────────────────────────────
   if ($('#announcements-list').length) {
     authGuard();
 
@@ -18,7 +18,6 @@ $(function () {
           $list.empty();
 
           const all   = extractList(res, ['announcements', 'data', 'results']);
-          // ROLE-BASED GUARD: users only see published announcements
           const items = isAdmin() ? all : onlyPublished(all);
 
           if (!items.length) {
@@ -38,9 +37,8 @@ $(function () {
               ? '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">● Published</span>'
               : '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">● Draft</span>';
 
-            // ROLE-BASED GUARD: admin-only action buttons
             const adminBtns = isAdmin() ? `
-              <a href="announcement-form.html?id=${a.id}" class="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition font-medium">Edit</a>
+              <button type="button" class="edit-ann text-xs bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition font-medium" data-id="${a.id}">Edit</button>
               <button class="toggle-pub text-xs border px-3 py-1.5 rounded-lg transition font-medium
                 ${!!a.published ? 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'}"
                 data-id="${a.id}" data-pub="${!!a.published ? '1' : '0'}">
@@ -64,13 +62,24 @@ $(function () {
                   </div>
                 </div>
                 <div class="flex gap-2 flex-wrap mt-4 pt-3 border-t border-slate-50">
-                  <a href="announcement-detail.html?id=${a.id}" class="text-xs bg-indigo-600 text-white px-4 py-1.5 rounded-lg hover:bg-indigo-700 transition font-medium">▶ Play</a>
+                  <button type="button" class="play-ann text-xs bg-indigo-600 text-white px-4 py-1.5 rounded-lg hover:bg-indigo-700 transition font-medium" data-id="${a.id}">
+                    ▶ Play
+                  </button>
                   ${adminBtns}
                 </div>
               </div>`);
           });
 
-          // ROLE-BASED GUARD: admin-only delete/toggle
+          $(document).off('click', '.play-ann').on('click', '.play-ann', function () {
+            sessionStorage.setItem('ce_ann_id', $(this).data('id'));
+            window.location.href = './announcement-detail.html';
+          });
+
+          $(document).off('click', '.edit-ann').on('click', '.edit-ann', function () {
+            sessionStorage.setItem('ce_edit_ann_id', $(this).data('id'));
+            window.location.href = './announcement-form.html';
+          });
+
           $(document).off('click', '.delete-ann').on('click', '.delete-ann', function () {
             const id = $(this).data('id');
             if (!confirm('Delete this announcement?')) return;
@@ -83,7 +92,7 @@ $(function () {
             const id  = $(this).data('id');
             const pub = $(this).data('pub') === '1';
             $.ajax({ url: BASE_URL + '/api/announcements/' + id + '/' + (pub ? 'unpublish' : 'publish'), method: 'PATCH' })
-              .done(() => { showToast(pub ? 'Unpublished.' : 'Published! Users can now hear it.', pub ? 'info' : 'success'); fetchAndRender(); })
+              .done(() => { showToast(pub ? 'Unpublished.' : 'Published!', pub ? 'info' : 'success'); fetchAndRender(); })
               .fail(() => showToast('Update failed.', 'error'));
           });
         })
@@ -99,37 +108,48 @@ $(function () {
     fetchAndRender();
   }
 
-  // ── ANNOUNCEMENT DETAIL ──────────────────────────────────────
+  // ── ANNOUNCEMENT DETAIL ───────────────────────────────────────
   if ($('#ann-detail').length) {
     if (!isLoggedIn()) { logout(); return; }
-    const id = new URLSearchParams(location.search).get('id');
+    const id = new URLSearchParams(location.search).get('id')
+             || sessionStorage.getItem('ce_ann_id');
+    sessionStorage.removeItem('ce_ann_id');
     if (!id) { window.location.href = 'announcements.html'; return; }
 
     $.get(BASE_URL + '/api/announcements/' + id)
       .done(res => {
         const a = res.data || res;
         $('#ann-title').text(a.title);
-        $('#ann-date').text(new Date(a.created_at).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+        $('#ann-date').text(new Date(a.created_at).toLocaleDateString('en-US', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        }));
 
         const audioSrc = announcementAudioUrl(a.audio_url);
-        if (audioSrc) {
-          const audio = document.getElementById('audio-player');
-          audio.src = audioSrc;
+        const audio    = document.getElementById('audio-player');
 
-          $('#play-pause-btn').on('click', function () {
+        if (audioSrc && audio) {
+          audio.src = audioSrc;
+          audio.preload = 'auto';
+          audio.load();
+
+          // Play / Pause button
+          $('#play-pause-btn').off('click').on('click', function (e) {
+            e.preventDefault();
             if (audio.paused) {
-              audio.play().then(() => {
-                $('#play-icon').addClass('hidden'); 
-                $('#pause-icon').removeClass('hidden');
-                $(this).attr('aria-label', 'Pause');
-              }).catch(err => {
-                console.error('Audio play failed:', err);
-                showToast('Unable to play audio. Please try again.', 'error');
-                $('#audio-fallback').removeClass('hidden');
-              });
+              audio.play()
+                .then(() => {
+                  $('#play-icon').addClass('hidden');
+                  $('#pause-icon').removeClass('hidden');
+                  $(this).attr('aria-label', 'Pause');
+                })
+                .catch(err => {
+                  console.error('Play failed:', err);
+                  showToast('Unable to play audio.', 'error');
+                  $('#audio-fallback').removeClass('hidden');
+                });
             } else {
               audio.pause();
-              $('#play-icon').removeClass('hidden'); 
+              $('#play-icon').removeClass('hidden');
               $('#pause-icon').addClass('hidden');
               $(this).attr('aria-label', 'Play');
             }
@@ -141,31 +161,38 @@ $(function () {
             $('#audio-current').text(fmtTime(audio.currentTime));
             $('#audio-duration').text(fmtTime(audio.duration));
           });
-          audio.addEventListener('loadedmetadata', () => { 
-            $('#audio-duration').text(fmtTime(audio.duration)); 
-            // Ensure audio is ready to play
-            if (audio.readyState >= 2) {
-              $('#audio-fallback').addClass('hidden');
-            }
-          });
-          audio.addEventListener('canplay', () => {
+
+          audio.addEventListener('loadedmetadata', () => {
+            $('#audio-duration').text(fmtTime(audio.duration));
             $('#audio-fallback').addClass('hidden');
           });
-          audio.addEventListener('error', (e) => { 
-            console.error('Audio error:', e, audio.error);
-            $('#audio-fallback').removeClass('hidden'); 
-            showToast('Audio file cannot be played. Please contact support.', 'error');
+
+          audio.addEventListener('ended', () => {
+            $('#play-icon').removeClass('hidden');
+            $('#pause-icon').addClass('hidden');
+            $('#audio-progress').val(0);
           });
-          $('#audio-progress').on('input', function () { if (audio.duration) audio.currentTime = (this.value / 100) * audio.duration; });
-          $('#audio-volume').on('input', function () { audio.volume = this.value; });
-          audio.addEventListener('ended', () => { $('#play-icon').removeClass('hidden'); $('#pause-icon').addClass('hidden'); });
+
+          audio.addEventListener('error', () => {
+            $('#audio-fallback').removeClass('hidden');
+            showToast('Audio file cannot be played.', 'error');
+          });
+
+          $('#audio-progress').on('input', function () {
+            if (audio.duration) audio.currentTime = (this.value / 100) * audio.duration;
+          });
+
+          $('#audio-volume').on('input', function () {
+            audio.volume = this.value;
+          });
 
           $(document).on('keydown', function (e) {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-            if (e.code === 'Space') { e.preventDefault(); $('#play-pause-btn').trigger('click'); }
+            if (e.code === 'Space')      { e.preventDefault(); $('#play-pause-btn').trigger('click'); }
             if (e.code === 'ArrowLeft')  audio.currentTime = Math.max(0, audio.currentTime - 5);
             if (e.code === 'ArrowRight') audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 5);
           });
+
         } else {
           $('#audio-fallback').removeClass('hidden');
         }
@@ -178,10 +205,12 @@ $(function () {
       .fail(() => showToast('Could not load announcement.', 'error'));
   }
 
-  // ── ANNOUNCEMENT FORM (admin) ────────────────────────────────
+  // ── ANNOUNCEMENT FORM (admin) ─────────────────────────────────
   if ($('#ann-form').length) {
     adminGuard();
-    const id = new URLSearchParams(location.search).get('id');
+    const id = new URLSearchParams(location.search).get('id')
+             || sessionStorage.getItem('ce_edit_ann_id');
+    if (id) sessionStorage.setItem('ce_edit_ann_id', id);
 
     if (id) {
       $('#form-title').text('Edit Announcement');
@@ -195,8 +224,8 @@ $(function () {
     $('#audio').on('change', function () {
       const file = this.files[0];
       if (!file) return;
-      if (!file.type.startsWith('audio/')) { showToast('Only audio files allowed (MP3, WAV, OGG, M4A).', 'error'); this.value = ''; return; }
-      if (file.size > 100 * 1024 * 1024) { showToast('Audio must be under 100MB.', 'error'); this.value = ''; return; }
+      if (!file.type.startsWith('audio/')) { showToast('Only audio files allowed.', 'error'); this.value = ''; return; }
+      if (file.size > 100 * 1024 * 1024)  { showToast('Audio must be under 100MB.', 'error'); this.value = ''; return; }
       $('#audio-file-name').text(file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)');
     });
 
@@ -208,27 +237,25 @@ $(function () {
 
       const fd = new FormData(this);
       fd.set('published', $('#published').is(':checked') ? 'true' : 'false');
-      const $btn = $('#submit-btn');
-      $btn.prop('disabled', true).text('Uploading...');
+      const $btn = $('#submit-btn').prop('disabled', true).text('Uploading...');
 
       $.ajax({
-        url: id ? BASE_URL + '/api/announcements/' + id : BASE_URL + '/api/announcements',
-        method: id ? 'PUT' : 'POST',
-        data: fd, processData: false, contentType: false,
+        url:         id ? BASE_URL + '/api/announcements/' + id : BASE_URL + '/api/announcements',
+        method:      id ? 'PUT' : 'POST',
+        data:        fd,
+        processData: false,
+        contentType: false,
         xhr() {
           const x = new XMLHttpRequest();
           x.upload.onprogress = ev => {
-            if (ev.lengthComputable) $('#upload-progress').val(Math.round(ev.loaded / ev.total * 100)).removeClass('hidden');
+            if (ev.lengthComputable)
+              $('#upload-progress').val(Math.round(ev.loaded / ev.total * 100)).removeClass('hidden');
           };
           return x;
         },
         success() {
-          const isPublished = $('#published').is(':checked');
-          showToast(
-            id ? 'Announcement updated!' : (isPublished ? '✓ Announcement published! Users can now hear it.' : 'Saved as draft.'),
-            'success'
-          );
-          setTimeout(() => window.location.href = 'dashboard.html', 1200);
+          showToast(id ? 'Announcement updated!' : 'Announcement saved!', 'success');
+          setTimeout(() => window.location.href = './announcements.html', 1200);
         },
         error(xhr) {
           showToast(xhr.responseJSON?.message || 'Upload failed.', 'error');

@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="css/custom.css">
   <script src="js/config.js"></script>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col">
+<body class="user-site bg-slate-50 min-h-screen flex flex-col">
   <div id="nav-placeholder"></div>
 
   <!-- ═══ HERO ═══ -->
@@ -88,7 +88,7 @@
   <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-8">
     <!-- Admin create button -->
     <div id="admin-create-btn" class="hidden flex justify-end mb-6">
-      <a href="event-form.html" class="btn-primary">+ New Event</a>
+      <a href="./event-form.html" class="btn-primary">+ New Event</a>
     </div>
 
     <div id="events-list" class="media-grid"></div>
@@ -103,11 +103,12 @@
 
   <div id="footer-placeholder"></div>
 
-  <script src="js/events.js"></script>
+  <script src="js/events.js?v=3"></script>
   <script>
     $(function () {
       setupAjax();
       authGuard();
+      if (isAdmin()) { window.location.href = './dashboard.html'; return; }
       if (isAdmin()) $('#admin-create-btn').removeClass('hidden');
       const q = new URLSearchParams(location.search).get('q');
       if (q) $('#search-input').val(q).trigger('input');

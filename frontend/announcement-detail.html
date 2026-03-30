@@ -86,20 +86,28 @@
     $(function () {
       setupAjax();
       if (!isLoggedIn()) { logout(); return; }
-      const id = new URLSearchParams(location.search).get('id');
+      const id = new URLSearchParams(location.search).get('id')
+               || sessionStorage.getItem('ce_ann_id');
       if (isAdmin()) {
-        $('#back-link').attr('href', 'dashboard.html').text('← Back to Dashboard');
+        $('#back-link').attr('href', './dashboard.html').text('← Back to Dashboard');
         $('#admin-ann-controls').removeClass('hidden');
-        $('#admin-edit-ann').attr('href', 'announcement-form.html?id=' + id);
+        $('#admin-edit-ann').on('click', function (e) {
+          e.preventDefault();
+          sessionStorage.setItem('ce_edit_ann_id', id);
+          window.location.href = './announcement-form.html';
+        });
         $('#admin-delete-ann').on('click', function () {
           if (!confirm('Delete this announcement?')) return;
           $.ajax({ url: BASE_URL + '/api/announcements/' + id, method: 'DELETE' })
-            .done(() => { showToast('Deleted.', 'success'); setTimeout(() => window.location.href = 'dashboard.html', 900); })
+            .done(() => { showToast('Deleted.', 'success'); setTimeout(() => window.location.href = './dashboard.html', 900); })
             .fail(() => showToast('Delete failed.', 'error'));
         });
+        $('#nav-placeholder').load('partials/admin-nav.html');
+        $('#footer-placeholder').load('partials/admin-footer.html');
+      } else {
+        $('#nav-placeholder').load('partials/nav.html');
+        $('#footer-placeholder').load('partials/footer.html');
       }
-      $('#nav-placeholder').load('partials/nav.html');
-      $('#footer-placeholder').load('partials/footer.html');
     });
   </script>
 </body>
