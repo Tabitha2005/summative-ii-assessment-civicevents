@@ -1,290 +1,313 @@
-Project: CivicEvents - Accessible City Events & Services Portal
+# CivicEvents – Accessible City Events & Services Portal
 
-Overview / Goal
-Students will build the frontend (UI) only. The backend API is provided and contains endpoints for: auth, users, events, announcements (audio), promos (video + captions), notifications (in-app), dashboard statistics, event registrations and event feedback.
+## 📌 Project Overview
 
-Goal: Your job is to design and implement a polished, accessible, responsive frontend that consumes those APIs, enforces the permission model (admin vs normal user), and demonstrates thoughtful UX for each feature.
+**CivicEvents** is a responsive and accessible frontend web application designed to help users discover, engage with, and manage city events and services.
 
-Target tech: HTML, Tailwind CSS & jQuery.
+This project focuses on building a **polished user interface (UI)** that integrates with a pre-built backend API. It demonstrates modern frontend practices, role-based access control, and user-centered design.
 
-1. Authentication & global app behavior
-Requirements
-Implement Sign up and Login pages.
+---
 
-After login store token with secure client storage rules:
+## 🎯 Project Goals
 
-If session-only: use sessionStorage.
+* Build a **fully functional frontend** using:
 
-If persistent: use localStorage (note security tradeoffs).
+  * HTML
+  * Tailwind CSS
+  * jQuery
+* Integrate with RESTful backend APIs
+* Implement **role-based UI (Admin vs User)**
+* Ensure **accessibility, responsiveness, and usability**
+* Deliver a **professional user experience across all features**
 
-Include global auth context (or Redux) to hold user info { id, full_name, role } and token.
+---
 
-Attach Authorization: Bearer <token> header to protected API requests.
+## 🛠️ Technologies Used
 
-UI & Flows
-Signup
+* **HTML5**
+* **Tailwind CSS**
+* **jQuery**
+* **REST APIs (provided backend)**
+* **Browser Storage**
 
-Fields: full_name, email, password and confirm_password.
+  * `localStorage`
+  * `sessionStorage`
 
-Show password strength meter. Enforce strong password policy (min 8 chars, mixed-case, number, special char).
+---
 
-On success redirect to login page with success toast.
+## 🔐 Authentication & Authorization
 
-Login
+### Features
 
-Fields: email, password.
+* User **Sign Up** and **Login**
+* Secure token storage:
 
-On success save token and user, redirect to Dashboard.
+  * `sessionStorage` (session-based)
+  * `localStorage` (persistent login)
+* Global user state:
 
-Edge cases
-Expired tokens should sign the user out and show message.
+  ```json
+  { id, full_name, role }
+  ```
+* Protected API requests using:
 
-Show clear errors on 4xx/5xx responses.
+  ```
+  Authorization: Bearer <token>
+  ```
 
-2. Permissions (roles)
-Two roles: admin, user (normal).
+### Role-Based Access
 
-Enforce in UI (hide/show controls) and in any client-side guard. Example:
+| Feature              | Admin | User |
+| -------------------- | ----- | ---- |
+| Manage Events        | ✅     | ❌    |
+| Manage Promos        | ✅     | ❌    |
+| Manage Announcements | ✅     | ❌    |
+| Manage Users         | ✅     | ❌    |
+| View Content         | ✅     | ✅    |
+| Register for Events  | ❌     | ✅    |
+| Submit Feedback      | ❌     | ✅    |
 
-Only admins can create/edit/delete events, promos, announcements, manage users, and create broadcast notifications.
+> ⚠️ Note: Backend enforces security. Frontend role checks are for UX only.
 
-Normal users can view published content, register for events, submit feedback, view their profile and their registrations, etc
+---
 
-Always rely on backend for real security — frontend controls are only for UX.
+## 🧭 Application Features
 
-3. Global layout & navigation
-Logo, Search bar (global), Links: Events, Announcements, Promos, Notifications (bell icon + unread count), Profile (dropdown), Admin (if admin), Dashboard (if admin).
+### 🏠 Global Layout
 
-Left or top sidebar for Dashboard pages (admin).
+* Navigation bar with:
 
-Notification drawer/panel: shows in-app notifications from /api/notifications for logged-in user.
+  * Logo
+  * Search
+  * Events, Announcements, Promos
+  * Notifications (with unread count)
+  * Profile dropdown
+  * Admin panel (admin only)
+* Notification drawer (in-app alerts)
+* Responsive design (mobile-first)
+* Accessible UI with ARIA support
 
-Footer with contact/help and other relevant information.
+---
 
-4. Events feature
-Pages/components
-Events List (GET /api/events)
+## 📅 Events
 
-Show only events where published=true (unless admin viewing an admin-only list).
+* View published events
+* Search, filter, and paginate
+* Event details:
 
-Event display: title, date/time, location, image (if metadata.image_url), short description, actions: View, Register (if user), Edit/Delete (admin).
+  * Description, time, location, image
+* User actions:
 
-Search and filters (by date, location).
+  * Register / Cancel registration
+  * Submit feedback (rating + comment)
+* Admin actions:
 
-Pagination controls.
+  * Create, edit, delete events
+  * Upload event images
 
-Event Detail (GET /api/events/:id)
+---
 
-Full description, image (from metadata.image_url), start/end datetime, location, map link if appropriate.
+## 🔊 Announcements (Audio)
 
-Register button (calls POST /api/event-registrations or register endpoint) — if already registered show Cancel registration.
+* Browse published announcements
+* Audio playback with accessible controls
+* Transcript support (if available)
+* Admin:
 
-Show list of registrants (admin only) from GET /api/event-registrations/event/:event_id.
+  * Upload audio files
+  * Publish/unpublish announcements
 
-Feedback section: show average rating, list of feedback, and Add Feedback form (rating 1–5 + comment).
+---
 
-Event create/edit (Admin)
+## 🎬 Promos (Video + Captions)
 
-Form fields: title, description, location, starts_at, ends_at, published toggle, image upload field (file: key 'image').
+* Watch promotional videos
+* Caption support for accessibility
+* Admin:
 
-Upload flow: use multipart/form-data and the configured endpoint expects uploadEventImage.single('image') and event JSON fields.
+  * Upload videos
+  * Add captions
+  * Manage visibility
 
-After create/update, display success message and redirect.
+---
 
-UX considerations
-Show preview of uploaded image before submit.
+## 🔔 Notifications
 
-For image display, use the public URL: ${baseUrl}/uploads/events/<filename> as returned by the backend (or saved in metadata.image_url).
+* In-app notification system
+* Notification bell with unread count
+* View detailed messages
+* Admin:
 
-Show loading state during API calls.
+  * Delete notifications
+* Supports broadcast and user-specific messages
 
-Acceptance criteria
-Users can see published events and register.
+---
 
-Admin can create/edit/delete events and upload image; image URL persists and displays.
+## 📊 Admin Dashboard
 
-5. Announcements (audio)
-Pages/components
-Announcements List (GET /api/announcements) — only published=true.
+* Overview statistics:
 
-Card includes title, length (duration_seconds), play button, created_at.
+  * Total events
+  * Users
+  * Registrations
+  * Notifications
+* User management:
 
-Announcement Detail (GET /api/announcements/:id)
+  * Enable/disable accounts
+  * View user details
 
-Audio player (HTML5 <audio> with source = audio_url), transcript (if provided).
+---
 
-Create Announcement (Admin)
+## 👤 User Profile
 
-Form fields: title, audio upload (file key audio), published toggle.
+* View and update:
 
-Upload audio using multipart/form-data, field name audio.
+  * Full name
+  * Email
+* Restrictions:
 
-After create, backend will create a notification — UI should show success toast.
+  * Cannot change role or account status
+* Error handling for duplicate emails
 
-UX & accessibility
-Use accessible audio controls (keyboard focus, labels).
+---
 
-Provide fallback text for browsers that can’t play format.
+## 📝 Event Registration & Feedback
 
-Display friendly playback UI and current time/duration.
+* Register for events
+* View “My Registrations”
+* Cancel registrations
+* Submit feedback:
 
-Acceptance criteria
-Audio is uploaded and playable from the announcement detail.
+  * One review per event
+  * Rating (1–5) + comment
+* View average event ratings
 
-Admin-only create/edit/delete controls visible only to admin.
+---
 
-6. Promos (video + captions)
-Pages/components
-Promos List (GET /api/promos) — show only published=true.
+## ⚠️ Error Handling & Edge Cases
 
-Promo display: thumbnail (if backend provides or render first frame), title, short description, Play button.
+* Friendly error messages for API responses
+* Handling:
 
-Promo Detail (GET /api/promos/:id)
+  * 401 → Redirect to login
+  * 403 → Access denied message
+* Network failure fallback with retry
+* Client-side validation for all inputs
+* File upload validation (type & size)
 
-HTML5 <video> element with src = video_url and <track kind="captions" src="caption_url" srclang="en" label="English">.
+---
 
-Play/pause, volume, fullscreen.
+## ♿ Accessibility & UX
 
-Create Promo (Admin)
+* Semantic HTML structure
+* ARIA attributes and keyboard navigation
+* High color contrast
+* Responsive layouts
+* Media accessibility:
 
-Fields: title, description, video upload (file key video) and caption_text.
+  * Audio controls
+  * Video captions
+* Loading indicators and skeleton states
 
-Upload uses uploadPromoVideo.single('video') and optional captions.
+---
 
-UX & accessibility
-Captions track must be available and enabled by default or easily toggled.
+## ⚡ Performance Optimizations
 
-Provide a transcript or description for accessibility if possible.
+* Lazy loading for media
+* Caching API responses where appropriate
+* Optimistic UI updates
+* Efficient DOM manipulation with jQuery
 
-Acceptance criteria
-Videos play with captions when available.
+---
 
-Admin can upload video and captions; promo persists and can be published/unpublished.
+## 🔌 Backend Integration
 
-7. Notifications (in-app)
-Data model assumptions
-Notifications returned by /api/notifications should be filtered to the logged-in user (or show broadcast items).
+### Base URL
 
-Pages/components
-Notification Bell: shows count.
+```
+http://localhost:YOUR_PORT/api
+```
 
-Notifications Drawer/Inbox (GET /api/notifications)
+### Key Endpoints Used
 
-List notifications (title, message, time, type), click opens detail.
+* `/auth`
+* `/users`
+* `/events`
+* `/announcements`
+* `/promos`
+* `/notifications`
+* `/dashboard`
+* `/event-registrations`
+* `/feedback`
 
-Delete (admins) /DELETE /api/notifications/:id.
+> 📖 Refer to `API_ENDPOINTS.md` for full details.
 
-Notification detail: show full message and include link to related resource using metadata (e.g., event_id → open event).
+---
 
-Acceptance criteria
-Notifications list shows broadcast and targeted ones for the user.
+## 🚀 How to Run the Project Locally
 
-Admins can delete notifications via UI (a form in Admin panel).
+### 1. Clone the Repository
 
-8. Dashboard (admin)
-Pages/components
-Dashboard summary (GET /api/dashboard/admin)
+```bash
+git clone https://github.com/Tabitha2005/summative-ii-assessment-civicevents.git
+cd summative-ii-assessment-civicevents
+```
 
-Display: total events, total promos, users count, registrations count, unread notifications, etc
+### 2. Open the Frontend
 
-Users management (admin)
+* Navigate to the `frontend` folder
+* Open `index.html` in your browser
 
-List users, enable/disable toggle (PATCH endpoints), view profile.
+OR use Live Server (recommended)
 
-Note: Admins cannot change a user’s role via UI according to rules.
+---
 
-Acceptance criteria
-Dashboard displays correct numbers from API.
+### 3. Connect to Backend
 
-Charts are readable and update when data changes.
+* Ensure backend server is running
+* Update API base URL in your JS files if needed
 
-9. Users & Profile
-Pages/components
-My Profile
+---
 
-Show user info: full_name, email, role, is_active.
+## 📁 Project Structure
 
-Form to update full_name and email; disallow updates to role and is_active.
+```
+/frontend
+  /css
+  /js
+  /pages
+  index.html
 
-When user updates email, frontend should show confirmation if API returns conflict.
+/backend (provided)
+```
 
-Admin user management
+---
 
-List users (GET /api/users), view single user (GET /api/users/:id).
+## 🎥 Demo Requirements
 
-Admin-only actions: enable/disable user via PATCH or dedicated endpoints. Admins cannot update user role from the UI (per rules).
+The project includes a recorded demo (5–7 minutes) covering:
 
-Acceptance criteria
-Users can update their profile (not their role).
+* Admin functionalities
+* User functionalities
+* Backend API integration
+* Database setup overview
 
-Admin can enable/disable but not change user role.
+---
 
-10. Event registration & feedback
-Registration
-POST /api/event-registrations with user_id and event_id (or dedicated register endpoint).
+## 🧾 Additional Notes
 
-Provide “My registrations” page (GET /api/event-registrations/my-registrations) showing registered events.
+* Role-based guards are implemented in frontend logic (JS files)
+* Media uploads use `multipart/form-data`
+* Tokens are securely stored based on session preference
 
-Cancel registration option calls PATCH/DELETE depending on API.
+---
 
-Feedback
-Users can submit one feedback per event (rating + comment).
+## 👩‍💻 Author
 
-Display average rating on event detail.
+**Tabitha**
 
-Acceptance criteria
-Users can register/unregister; registrations persist and display in “My events”.
+---
 
-Feedback is linked to event and user; user cannot leave multiple feedback entries for same event.
+## 📄 License
 
-11. Error handling & edge cases
-Always show user-friendly error messages from API responses.
-
-Show network error fallback and retry options for critical operations.
-
-Validate inputs client-side before sending to server.
-
-For file uploads: show size/type errors before uploading.
-
-If user is unauthorized (401), redirect to login.
-
-If user is forbidden (403) show appropriate message and options (contact admin).
-
-12. Accessibility & responsive design
-Use semantic HTML, proper aria-* attributes, and keyboard focus management.
-
-Ensure color contrast is acceptable.
-
-Make layout responsive: mobile-first breakpoints for lists/cards.
-
-Provide labels for file inputs and show clear progress indicators for uploads.
-
-13. Performance & UX polish
-Use lazy loading for heavy media (videos).
-
-Show skeleton loaders for lists when data is loading.
-
-Use optimistic UI for small actions (e.g., marking a notification as read) but revert on failure.
-
-Cache lists where appropriate (e.g., promos) and invalidate on create/update.
-
-14. Backend API Setup
-Refer to Readme.md file in the backend directory located in the GitHub repository
-Deliverables
-Each student must submit:
-
-A working frontend app (GitHub repository) with:
-
-README with how to run locally, and notes on any environment variables.
-
-Instructions for how to connect to the provided backend (base URL).
-
-All UI implementation must go into the frontend directory/folder in the GitHub repository.
-Short recorded demo (5–7 minutes) showing:
-
-all admin actions.
-
-all normal user actions.
-
-backend API and database setup.
-Code comments explaining where role-based guards are implemented.
+This project is for academic purposes.
